@@ -1,48 +1,50 @@
-close all
-clear all
-clc;
+function moving_average_filter
+    close all
+    clear all
+    clc;
 
-%******* Moving Average *******%
+    %******* Moving Average *******%
 
-%% Inputs
+    %% Inputs
+    inputImage = imread('1.tif');
+    [rows, cols] = size(inputImage);
 
-% InputImg = ~im2double( rgb2gray( imread( 'E.png' ) ) );
-InputImg = imread( '1.tif' ) ;
-[ M N ] = size( InputImg );
+    %% Structure Element - Square
+    prompt = {'n', 'b'};
+    dlg_title = 'Enter Info';
+    num_lines = 1;
+    def = {'20', '0.5'};
+    answer = inputdlg(prompt, dlg_title, num_lines, def);
+    n = str2double(answer{1});
+    b = str2double(answer{2});
 
-%% Structure Element - Square
-   
-prompt = {'n','b'};
-dlg_title = 'Enter Info';
-num_lines = 1;
-def = {'20','0.5'};
-answer = inputdlg(prompt,dlg_title,num_lines,def);
-n = str2double(answer{1});
-b = str2double(answer{2});
+    %% Moving Average
+    outputImage = movingAverage(inputImage, rows, cols, n, b);
 
-[ InputImgR Mnew Nnew] = ZeroPad( n - 1 , InputImg , M , N );
-        
-%% Moving Average
+    %% Plotting
+    plotResults(inputImage, outputImage);
+end
 
-for i = 1 : Mnew
-    for j = n : Nnew
-        
-        Local( : , : ) = InputImgR( i , j - n + 1 : j );
-        Mean = mean( Local );
-        T = b * Mean;
-        
-        if InputImgR( i , j ) >= T
-            OutputImg( i , j - n + 1 ) = 1;
-        else
-            OutputImg( i , j - n + 1 ) = 0;
+function outputImage = movingAverage(inputImage, rows, cols, n, b)
+    paddedImage = padarray(inputImage, [0, n-1], 'replicate', 'post');
+    outputImage = zeros(rows, cols);
+
+    for i = 1:rows
+        for j = n:cols + n - 1
+            localRegion = paddedImage(i, j - n + 1:j);
+            meanValue = mean(localRegion);
+            T = b * meanValue;
+            if paddedImage(i, j) >= T
+                outputImage(i, j - n + 1) = 1;
+            else
+                outputImage(i, j - n + 1) = 0;
+            end
         end
-        
     end
 end
 
-%% Plotting
-
-figure,
-subplot(121),imshow( InputImg );title('Text Image Corrupted by Spot Shading');
-subplot(122),imshow( OutputImg );title('Corrected Image');
-        
+function plotResults(inputImage, outputImage)
+    figure,
+    subplot(121), imshow(inputImage); title('Text Image Corrupted by Spot Shading');
+    subplot(122), imshow(outputImage); title('Corrected Image');
+end
