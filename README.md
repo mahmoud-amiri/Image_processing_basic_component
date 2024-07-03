@@ -10,18 +10,18 @@ This repository is intended for anyone interested in learning about basic image 
 
 To get started with these scripts, you will need MATLAB installed on your machine. You can download MATLAB from [MathWorks](https://www.mathworks.com/products/matlab.html).
 
-### Prerequisites
+## Prerequisites
 
 - MATLAB R2021b or later
 
-### Installation
+## Installation
 
 1. Clone this repository:
 ```bash
    git clone git@github.com:mahmoud-amiri/Image_processing_basic_component.git
 ```
 
-### List of Scripts
+## List of Scripts
 
 Here is a brief description of each script included in this repository:
 
@@ -85,6 +85,6 @@ Here is a brief description of each script included in this repository:
 
 **Using Edges To Improve Global Thresholding**: Improves global thresholding using edge information.
 
-### License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
