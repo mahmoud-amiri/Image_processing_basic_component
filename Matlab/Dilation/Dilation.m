@@ -1,62 +1,61 @@
-close all
-clear all
-clc;
+function dilation
+    close all
+    clear all
+    clc;
 
-%******* Dilation *******%
+    %******* Dilation *******%
 
-%% Inputs
+    %% Inputs
+    inputImage = imread('D1.tif');
+    [rows, cols] = size(inputImage);
 
-% InputImg = ~im2double( rgb2gray( imread( 'D.png' ) ) );
-InputImg = imread( 'D1.tif' ) ;
-[ M N ] = size( InputImg );
+    %% Structure Element - Square
+    method = 'Square';
+    prompt = {'Size of Square'};
+    dlg_title = 'Enter Info';
+    num_lines = 1;
+    def = {'3'};
+    answer = inputdlg(prompt, dlg_title, num_lines, def);
+    structElemSize = str2double(answer{1});
+    radius = floor(structElemSize / 2);
 
-%% Structure Element - Square
-   
-Method = 'Square';
-prompt = {'Size of Square'};
-dlg_title = 'Enter Info';
-num_lines = 1;
-def = {'3'};
-answer = inputdlg(prompt,dlg_title,num_lines,def);
-W = str2double(answer{1});
-r = floor( W / 2 );
-[ InputImgR Mnew Nnew] = ZeroPad( r , InputImg , M , N );
-MainParam = [ 'Size of Square = ',num2str(W) ];
-        
-%% Dilation
+    [paddedImage, newRows, newCols] = zeroPad(radius, inputImage, rows, cols);
+    mainParam = ['Size of Square = ', num2str(structElemSize)];
 
-StrEl = [ 0 1 0 ; 1 1 1 ; 0 1 0];
-    
-for i = r + 1 : Mnew - r 
-    for j = r + 1 : Nnew - r
-        
-        Local( : , : ) = InputImgR( i - r : i + r , j - r : j + r );
-        Local = Local .* StrEl;
-        A = sum( sum( Local ) );
-            
-        if A ~= 0
-            OutputImg( i - r , j - r ) = 1;
-        else
-            OutputImg( i - r , j - r ) = 0;
+    %% Dilation
+    structElem = [0 1 0; 1 1 1; 0 1 0];
+
+    outputImage = performDilation(paddedImage, structElem, radius, newRows, newCols);
+
+    % Matlab Command
+    matlabStructElem = strel('square', structElemSize);
+    matlabOutput = imdilate(inputImage, matlabStructElem, 'same');
+
+    %% Plotting
+    figure,
+    subplot(131), imshow(inputImage); title('Main Image');
+    subplot(132), imshow(outputImage); title({['Dilated Image Using ', method, ' Structure Element'], mainParam});
+    subplot(133), imshow(matlabOutput); title('Dilated Image Using Matlab Command and Same Struct Element');
+end
+
+function [zeroPaddedImage, newRows, newCols] = zeroPad(radius, inputImage, rows, cols)
+    zeroPaddedImage = zeros(rows + 2 * radius, cols + 2 * radius);
+    zeroPaddedImage(radius + 1 : rows + radius, radius + 1 : cols + radius) = inputImage;
+    [newRows, newCols] = size(zeroPaddedImage);
+end
+
+function outputImage = performDilation(paddedImage, structElem, radius, newRows, newCols)
+    outputImage = zeros(newRows - 2 * radius, newCols - 2 * radius);
+
+    for i = radius + 1 : newRows - radius
+        for j = radius + 1 : newCols - radius
+            localRegion = paddedImage(i - radius : i + radius, j - radius : j + radius);
+            localRegion = localRegion .* structElem;
+            if sum(localRegion(:)) ~= 0
+                outputImage(i - radius, j - radius) = 1;
+            else
+                outputImage(i - radius, j - radius) = 0;
+            end
         end
-    
     end
 end
-    
-% Matlab Command
-    
-% StrEl = strel( 'square' , W );
-Out = imdilate( InputImg , StrEl , 'same' );      
-
-%% Plotting
-
-figure,
-% subplot(131),imshow(~InputImg);title('Main Image');
-% subplot(132),imshow(~OutputImg);title({['Dilated Image Using ',num2str(Method),' Structure Element'] , MainParam });
-% subplot(133),imshow(~Out);title('Dilated Image Using Matlab Command and Same Str Element' );
-
-subplot(131),imshow(InputImg);title('Main Image');
-subplot(132),imshow(OutputImg);title({['Dilated Image Using ',num2str(Method),' Structure Element'] , MainParam });
-subplot(133),imshow(Out);title('Dilated Image Using Matlab Command and Same Str Element' );
-
-        
